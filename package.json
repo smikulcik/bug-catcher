@@ -1,0 +1,23 @@
+{
+  "name": "bug-catcher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smikulcik/bug-catcher.git"
+  },
+  "author": "Simon Mikulcik <smikulcik@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smikulcik/bug-catcher/issues"
+  },
+  "homepage": "https://github.com/smikulcik/bug-catcher#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
+}
