@@ -11,6 +11,16 @@ var Butterfly = function(sprite, name){
 }
 
 Butterfly.prototype.Update = function (){
+
+  if(this.sprite.x > game.world.width)
+    this.sprite.x = game.world.width
+  if(this.sprite.x < 0)
+    this.sprite.x = 0
+  if(this.sprite.y > game.world.height)
+    this.sprite.y = game.world.height
+  if(this.sprite.y < 0)
+    this.sprite.y = 0
+
   // maybe change direction
   if(Math.random() < 0.05) {
     this.direction = (this.direction + (Math.random() < 0.5 ? -1 : 1) + 8) % 8;

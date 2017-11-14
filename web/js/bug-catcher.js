@@ -1,29 +1,38 @@
+//exports
+var bugCatcherState;
 
+var inventory = [];
+
+//debug
+var detailsMenu;
+var player;
+var readyToShowDetails = false;
+var playerPauseCountdown = 0;
+
+// privates
+(function(){
 var map;
 var layer;
 var cursors;
 var catchButton;
-var player;
 var playerDirection = "forward";
-var playerPauseCountdown = 0;
 var butterflies = [];
 
-
-var bugCatcherState = {
+bugCatcherState = {
 
   preload: function() {
-    console.log('bc preload');
     //  game.load.tilemap('map', 'assets/tilemaps/csv/catastrophi_level2.csv', null, Phaser.Tilemap.CSV);
     //  game.load.image('tiles', 'assets/tilemaps/tiles/catastrophi_tiles_16.png');
     //  game.load.image('player', 'assets/sprites/tinycar.png');
     game.load.spritesheet('player', 'assets/sprites/louis.png', 200, 200)
     game.load.image('background', 'assets/textures/grass.png')
+    game.load.image('menuTex', 'assets/textures/menu.png')
     game.load.spritesheet('monarch', 'assets/sprites/monarch.png', 25, 25)
+    game.load.spritesheet('monarchBig', 'assets/sprites/monarchBig.png', 400, 400)
   },
 
   create: function() {
 
-      console.log('bc create');
       game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 
       game.add.tileSprite(0, 0, 1920, 1920, 'background');
@@ -31,28 +40,13 @@ var bugCatcherState = {
 
       game.physics.startSystem(Phaser.Physics.P2JS);
 
-      player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
-      player.animations.add('idleforward', [1], 10, false);
-      player.animations.add('walkforward', [0,1,2,1], 10, true);
-      player.animations.add('catchforward', [3], 10, false);
-
-      player.animations.add('idleleft', [4], 10, false);
-      player.animations.add('walkleft', [4,5,6,5], 10, true);
-      player.animations.add('catchleft', [7], 10, false);
-
-      player.animations.add('idleback', [9], 10, false);
-      player.animations.add('walkback', [8,9,10,9], 10, true);
-      player.animations.add('catchback', [11], 10, false);
-
-      player.animations.add('idleright', [12], 10, false);
-      player.animations.add('walkright', [12,13,14,13], 10, true);
-      player.animations.add('catchright', [15], 10, false);
+      player = createSprite(playerData, game.world.centerX, game.world.centerY);
 
       for(var i=0;i<10;i++){
-        var monarch = game.add.sprite(game.world.centerX + Math.random()*600-300, game.world.centerY + Math.random()*600 - 300, 'monarch');
-        monarch.animations.add('fly', [0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1], 10, true);
-        monarch.animations.play("fly")
-        butterflies.push(new Butterfly(monarch, "Monarch Butterfly"))
+        butterflies.push(new Butterfly(
+          createSprite(bugData.monarch, game.world.centerX + Math.random()*600-300, game.world.centerY + Math.random()*600 - 300),
+          "Monarch Butterfly"
+        ));
       }
       game.physics.p2.enable(player);
 
@@ -61,52 +55,66 @@ var bugCatcherState = {
 
       game.camera.follow(player);
 
+      detailsMenu = new DetailsMenu();
   },
 
   update: function() {
-      player.body.rotation=0;
-      player.body.setZeroVelocity();
 
-      for(var b in butterflies){
-          butterflies[b].Update()
-      }
+    detailsMenu.draw();
+    if (detailsMenu.visible){
+      detailsMenu.update();
+      return;
+    }
+    if (!catchButton.isDown && readyToShowDetails) {
+      detailsMenu.visible = true;
+      readyToShowDetails = false;
+      player.animations.play('idle'+playerDirection)
+      return
+    }
 
-      if (playerPauseCountdown > 0){
-        playerPauseCountdown--
-        return;
-      }
+    player.body.rotation=0;
+    player.body.setZeroVelocity();
 
-      if(catchButton.isDown){
-        player.animations.play('catch' + playerDirection);
-        catchBug();
-        playerPauseCountdown=50;
-      }
-      else if (cursors.left.isDown)
-      {
-          player.body.moveLeft(300)
-          player.animations.play('walkleft');
-          playerDirection = "left";
-      }
-      else if (cursors.right.isDown)
-      {
-          player.body.moveRight(300)
-          player.animations.play('walkright');
-          playerDirection = "right";
-      }
-      else if (cursors.up.isDown)
-      {
-          player.body.moveUp(300)
-          player.animations.play('walkback');
-          playerDirection = "back";
-      }
-      else if (cursors.down.isDown)
-      {
-          player.body.moveDown(300)
-          player.animations.play('walkforward');
-          playerDirection = "forward";
-      } else {
-          player.animations.play('idle'+playerDirection)
-      }
+    for(var b in butterflies){
+        butterflies[b].Update()
+    }
+
+    if (playerPauseCountdown > 0){
+      playerPauseCountdown--
+      return;
+    }
+
+    if(catchButton.isDown){
+      player.animations.play('catch' + playerDirection);
+      catchBug();
+      playerPauseCountdown=50;
+    }
+    else if (cursors.left.isDown)
+    {
+      player.body.moveLeft(300)
+      player.animations.play('walkleft');
+      playerDirection = "left";
+    }
+    else if (cursors.right.isDown)
+    {
+      player.body.moveRight(300)
+      player.animations.play('walkright');
+      playerDirection = "right";
+    }
+    else if (cursors.up.isDown)
+    {
+      player.body.moveUp(300)
+      player.animations.play('walkback');
+      playerDirection = "back";
+    }
+    else if (cursors.down.isDown)
+    {
+      player.body.moveDown(300)
+      player.animations.play('walkforward');
+      playerDirection = "forward";
+    } else {
+      player.animations.play('idle'+playerDirection)
+    }
   }
 };
 
@@ -158,9 +166,10 @@ function catchBug(){
   // catch bugs that are in hitbox
   for (var b = butterflies.length - 1; b >= 0; b--){
     if(IsInBox(butterflies[b].sprite.x, butterflies[b].sprite.y, hitboxX, hitboxY, hitboxW, hitboxH)){
-    console.log("I caught a "+butterflies[b].Name );
       butterflies[b].sprite.destroy();
+      inventory.push(butterflies[b].sprite.key);
       butterflies.splice(b,1);
+      readyToShowDetails = true;
     }
   }
 }
@@ -171,3 +180,4 @@ function IsInBox(px, py, bx, by, bw, bh){
   }
   return false;
 }
+})();
