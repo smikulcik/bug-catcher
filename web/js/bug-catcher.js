@@ -1,57 +1,173 @@
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
-
-function preload() {
-
-  //  game.load.tilemap('map', 'assets/tilemaps/csv/catastrophi_level2.csv', null, Phaser.Tilemap.CSV);
-  //  game.load.image('tiles', 'assets/tilemaps/tiles/catastrophi_tiles_16.png');
-  //  game.load.image('player', 'assets/sprites/tinycar.png');
-
-}
-
 var map;
 var layer;
-var wasd = {};
+var cursors;
+var catchButton;
 var player;
+var playerDirection = "forward";
+var playerPauseCountdown = 0;
+var butterflies = [];
 
-function create() {
 
-    //  Player
-    //player = game.add.sprite(48, 48, 'player');
+var bugCatcherState = {
 
-    //game.camera.follow(player);
+  preload: function() {
+    console.log('bc preload');
+    //  game.load.tilemap('map', 'assets/tilemaps/csv/catastrophi_level2.csv', null, Phaser.Tilemap.CSV);
+    //  game.load.image('tiles', 'assets/tilemaps/tiles/catastrophi_tiles_16.png');
+    //  game.load.image('player', 'assets/sprites/tinycar.png');
+    game.load.spritesheet('player', 'assets/sprites/louis.png', 200, 200)
+    game.load.image('background', 'assets/textures/grass.png')
+    game.load.spritesheet('monarch', 'assets/sprites/monarch.png', 25, 25)
+  },
 
-    //  Allow cursors to scroll around the map
-    wasd.up = game.input.keyboard.addKey(Phaser.Keyboard.W);
-    wasd.left = game.input.keyboard.addKey(Phaser.Keyboard.A);
-    wasd.down = game.input.keyboard.addKey(Phaser.Keyboard.S);
-    wasd.right = game.input.keyboard.addKey(Phaser.Keyboard.D);
+  create: function() {
 
-    var help = game.add.text(16, 16, 'Arrows to move', { font: '14px Arial', fill: '#ffffff' });
-    help.fixedToCamera = true;
+      console.log('bc create');
+      game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 
+      game.add.tileSprite(0, 0, 1920, 1920, 'background');
+      game.world.setBounds(0, 0, 1920, 1920);
+
+      game.physics.startSystem(Phaser.Physics.P2JS);
+
+      player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+      player.animations.add('idleforward', [1], 10, false);
+      player.animations.add('walkforward', [0,1,2,1], 10, true);
+      player.animations.add('catchforward', [3], 10, false);
+
+      player.animations.add('idleleft', [4], 10, false);
+      player.animations.add('walkleft', [4,5,6,5], 10, true);
+      player.animations.add('catchleft', [7], 10, false);
+
+      player.animations.add('idleback', [9], 10, false);
+      player.animations.add('walkback', [8,9,10,9], 10, true);
+      player.animations.add('catchback', [11], 10, false);
+
+      player.animations.add('idleright', [12], 10, false);
+      player.animations.add('walkright', [12,13,14,13], 10, true);
+      player.animations.add('catchright', [15], 10, false);
+
+      for(var i=0;i<10;i++){
+        var monarch = game.add.sprite(game.world.centerX + Math.random()*600-300, game.world.centerY + Math.random()*600 - 300, 'monarch');
+        monarch.animations.add('fly', [0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1], 10, true);
+        monarch.animations.play("fly")
+        butterflies.push(new Butterfly(monarch, "Monarch Butterfly"))
+      }
+      game.physics.p2.enable(player);
+
+      cursors = game.input.keyboard.createCursorKeys();
+      catchButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+
+      game.camera.follow(player);
+
+  },
+
+  update: function() {
+      player.body.rotation=0;
+      player.body.setZeroVelocity();
+
+      for(var b in butterflies){
+          butterflies[b].Update()
+      }
+
+      if (playerPauseCountdown > 0){
+        playerPauseCountdown--
+        return;
+      }
+
+      if(catchButton.isDown){
+        player.animations.play('catch' + playerDirection);
+        catchBug();
+        playerPauseCountdown=50;
+      }
+      else if (cursors.left.isDown)
+      {
+          player.body.moveLeft(300)
+          player.animations.play('walkleft');
+          playerDirection = "left";
+      }
+      else if (cursors.right.isDown)
+      {
+          player.body.moveRight(300)
+          player.animations.play('walkright');
+          playerDirection = "right";
+      }
+      else if (cursors.up.isDown)
+      {
+          player.body.moveUp(300)
+          player.animations.play('walkback');
+          playerDirection = "back";
+      }
+      else if (cursors.down.isDown)
+      {
+          player.body.moveDown(300)
+          player.animations.play('walkforward');
+          playerDirection = "forward";
+      } else {
+          player.animations.play('idle'+playerDirection)
+      }
+  }
+};
+
+var box = null;
+function AddBox(x, y, width, height){
+  if( box !== null) box.destroy();
+
+  var bmd = game.add.bitmapData(width, height);
+
+  bmd.ctx.beginPath();
+  bmd.ctx.rect(0, 0, width, height);
+  bmd.ctx.fillStyle = 'RGBA(255,255,255,25)';
+  bmd.ctx.fill();
+  box = game.add.sprite(x, y, bmd);
 }
 
-function update() {
 
-    if (wasd.left.isDown)
-    {
-    }
-    else if (wasd.right.isDown)
-    {
-    }
-    else
-    {
-    }
+function catchBug(){
+  var hitboxX, hitboxY, hitboxW, hitboxH;
+  switch (playerDirection) {
 
-    if (wasd.up.isDown)
-    {
-    }
-    else if (wasd.down.isDown)
-    {
-    }
+    case "forward":
+      hitboxX = player.x - 30;
+      hitboxY = player.y - 30;
+      hitboxW = 75;
+      hitboxH = 100;
+    break;
+    case "back":
+      hitboxX = player.x - 90;
+      hitboxY = player.y - 50;
+      hitboxW = 150;
+      hitboxH = 50;
+    break;
+    case "right":
+      hitboxX = player.x + 20;
+      hitboxY = player.y - 70;
+      hitboxW = 50;
+      hitboxH = 150;
+    break;
+    case "left":
+      hitboxX = player.x - 70;
+      hitboxY = player.y - 70;
+      hitboxW = 50;
+      hitboxH = 150;
+    break;
+  }
+  //AddBox(hitboxX, hitboxY, hitboxW, hitboxH);
 
+  // catch bugs that are in hitbox
+  for (var b = butterflies.length - 1; b >= 0; b--){
+    if(IsInBox(butterflies[b].sprite.x, butterflies[b].sprite.y, hitboxX, hitboxY, hitboxW, hitboxH)){
+    console.log("I caught a "+butterflies[b].Name );
+      butterflies[b].sprite.destroy();
+      butterflies.splice(b,1);
+    }
+  }
 }
 
-function render() {
+function IsInBox(px, py, bx, by, bw, bh){
+  if(px > bx && py > by && px < bx+bw && py < by+bh){
+    return true;
+  }
+  return false;
 }
