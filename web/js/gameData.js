@@ -9,10 +9,25 @@ var bugData = {
         loop: true
       }
     },
-    "name": "Monarch Butterfly",
+    "name": "Monarch",
     "size": "3.5 - 4\"",
     "food": "Milkweed",
     "fact": "In fall, the Monarch Butterfly migrates to Mexico and Florida for the winter.",
+  },
+  "cloudedSulphur": {
+    "sprite_name": "cloudedSulphur",
+    "default_animation": "fly",
+    "animations": {
+      "fly": {
+        frames: [0,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,1,0,0,0,1,2,1,0,0,0,0,0,0,0,],
+        fps: 25,
+        loop: true
+      }
+    },
+    "name": "Clouded Sulphur",
+    "size": "1 - 2\"",
+    "food": "Butterfly Bush, Dandelion, and Milkweed",
+    "fact": "They like mud puddles and are a good indicator of an ecosystem's health.",
   }
 };
 var playerData = {

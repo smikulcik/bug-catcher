@@ -8,6 +8,16 @@ var Butterfly = function(sprite, name){
   sprite.pivot.x = sprite.width / 2;
   sprite.pivot.y = sprite.height / 2;
   this.Name = name;
+
+  // so that no all butterflies have the same flutter
+  this.flutterOffset = Math.random()*6;
+
+  // offset frames so that the butterflies are not on the same flap
+  this.sprite.animations.currentAnim.setFrame(Math.floor(Math.random()*this.sprite.animations.currentAnim.frameTotal), true);
+
+  this.laziness = .5 + Math.random()*.5;
+  this.indeciciveness = Math.random()*.1;
+  this.speed = 1 + Math.random();
 }
 
 Butterfly.prototype.Update = function (){
@@ -22,55 +32,54 @@ Butterfly.prototype.Update = function (){
     this.sprite.y = 0
 
   // maybe change direction
-  if(Math.random() < 0.05) {
+  if(Math.random() < this.indeciciveness) {
     this.direction = (this.direction + (Math.random() < 0.5 ? -1 : 1) + 8) % 8;
   }
 
   // either move or stand still
-  if(Math.random() < .7) {
-    var speed = 2;
+  if(Math.random() < this.laziness) {
     switch (directions[this.direction]) {
       case "up":
-      this.sprite.y -= speed;
+      this.sprite.y -= this.speed;
       this.sprite.scale.y = 1;
       this.sprite.scale.x = 1;
       break;
       case "upright":
-      this.sprite.y -= speed*.7;
-      this.sprite.x += speed*.7;
+      this.sprite.y -= this.speed*.7;
+      this.sprite.x += this.speed*.7;
       this.sprite.scale.y = 1;
       this.sprite.scale.x = 1;
       break;
       case "right":
-      this.sprite.x += speed;
+      this.sprite.x += this.speed;
       this.sprite.scale.y = 1;
       this.sprite.scale.x = 1;
       break;
       case "downright":
-      this.sprite.y += speed*.7;
-      this.sprite.x += speed*.7;
+      this.sprite.y += this.speed*.7;
+      this.sprite.x += this.speed*.7;
       this.sprite.scale.y = -1;
       this.sprite.scale.x = 1;
       break;
       case "down":
-      this.sprite.y += speed;
+      this.sprite.y += this.speed;
       this.sprite.scale.y = -1;
       this.sprite.scale.x = 1;
       break;
       case "downleft":
-      this.sprite.y += speed*.7;
-      this.sprite.x -= speed*.7;
+      this.sprite.y += this.speed*.7;
+      this.sprite.x -= this.speed*.7;
       this.sprite.scale.y = -1;
       this.sprite.scale.x = -1;
       break;
       case "left":
-      this.sprite.x -= speed;
+      this.sprite.x -= this.speed;
       this.sprite.scale.y = 1;
       this.sprite.scale.x = -1;
       break;
       case "upleft":
-      this.sprite.y -= speed*.7;
-      this.sprite.x -= speed*.7;
+      this.sprite.y -= this.speed*.7;
+      this.sprite.x -= this.speed*.7;
       this.sprite.scale.y = 1;
       this.sprite.scale.x = -1;
       break;
@@ -78,5 +87,5 @@ Butterfly.prototype.Update = function (){
   }
 
   // flutter up and down
-    //this.sprite.y += Math.sin(game.time.totalElapsedSeconds()*3)*1.3
+  this.sprite.y += Math.sin(this.flutterOffset + game.time.totalElapsedSeconds()*6)*.3
 }

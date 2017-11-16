@@ -8,6 +8,7 @@ var detailsMenu;
 var player;
 var readyToShowDetails = false;
 var playerPauseCountdown = 0;
+var butterflies = [];
 
 // privates
 (function(){
@@ -16,7 +17,6 @@ var layer;
 var cursors;
 var catchButton;
 var playerDirection = "forward";
-var butterflies = [];
 
 bugCatcherState = {
 
@@ -29,6 +29,8 @@ bugCatcherState = {
     game.load.image('menuTex', 'assets/textures/menu.png')
     game.load.spritesheet('monarch', 'assets/sprites/monarch.png', 25, 25)
     game.load.spritesheet('monarchBig', 'assets/sprites/monarchBig.png', 400, 400)
+    game.load.spritesheet('cloudedSulphur', 'assets/sprites/cloudedSulphur.png', 25, 25)
+    game.load.spritesheet('cloudedSulphurBig', 'assets/sprites/cloudedSulphurBig.png', 400, 400)
   },
 
   create: function() {
@@ -42,10 +44,16 @@ bugCatcherState = {
 
       player = createSprite(playerData, game.world.centerX, game.world.centerY);
 
-      for(var i=0;i<10;i++){
+      for(var i=0;i<5;i++){
         butterflies.push(new Butterfly(
           createSprite(bugData.monarch, game.world.centerX + Math.random()*600-300, game.world.centerY + Math.random()*600 - 300),
           "Monarch Butterfly"
+        ));
+      }
+      for(var i=0;i<5;i++){
+        butterflies.push(new Butterfly(
+          createSprite(bugData.cloudedSulphur, game.world.centerX + Math.random()*600-300, game.world.centerY + Math.random()*600 - 300),
+          "Clouded Sulphur Butterfly"
         ));
       }
       game.physics.p2.enable(player);
@@ -167,7 +175,7 @@ function catchBug(){
   for (var b = butterflies.length - 1; b >= 0; b--){
     if(IsInBox(butterflies[b].sprite.x, butterflies[b].sprite.y, hitboxX, hitboxY, hitboxW, hitboxH)){
       butterflies[b].sprite.destroy();
-      inventory.push(butterflies[b].sprite.key);
+      inventory.unshift(butterflies[b].sprite.key);
       butterflies.splice(b,1);
       readyToShowDetails = true;
     }

@@ -51,8 +51,12 @@ DetailsMenu.prototype.draw = function(){
   if (inventory.length > 0 && this.currentBug != inventory[0]){
     this.currentBug = inventory[0];
     this.bug.loadTexture(inventory[0] + 'Big');
-    this.bug.animations.add('fly', [0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1], 10, true);
-    this.bug.animations.play('fly');
+
+
+    var spriteData = bugData[this.currentBug];
+    var anim = spriteData.animations[spriteData.default_animation];
+    this.bug.animations.add(spriteData.default_animation, anim.frames, anim.fps, anim.loop);
+    this.bug.animations.play(spriteData.default_animation);
   }
 
   // draw everything
@@ -63,11 +67,11 @@ DetailsMenu.prototype.draw = function(){
   this.bug.cameraOffset.y = game.height/2;
 
   this.nameText.cameraOffset.x = game.width/2 + 50;
-  this.nameText.cameraOffset.y = game.height/2 - 100;
+  this.nameText.cameraOffset.y = game.height/2 - 150;
   this.sizeText.cameraOffset.x = game.width/2 + 50;
-  this.sizeText.cameraOffset.y = game.height/2 - 50;
+  this.sizeText.cameraOffset.y = game.height/2 - 100;
   this.foodText.cameraOffset.x = game.width/2 + 50;
-  this.foodText.cameraOffset.y = game.height/2;
+  this.foodText.cameraOffset.y = game.height/2 - 50;
   this.factText.cameraOffset.x = game.width/2 + 50;
   this.factText.cameraOffset.y = game.height/2 + 50;
   if(this.currentBug){
